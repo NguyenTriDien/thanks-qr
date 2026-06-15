@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Special Thank You</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:sans-serif;
+}
+
+body{
+
+height:100vh;
+overflow:hidden;
+
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+
+background:
+linear-gradient(
+135deg,
+#1a1a2e,
+#16213e,
+#0f3460
+);
+
+color:white;
+}
+
+#gift{
+
+font-size:180px;
+cursor:pointer;
+
+animation:
+bounce 1s infinite;
+}
+
+@keyframes bounce{
+
+0%,100%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-25px);
+}
+
+}
+
+#message{
+
+display:none;
+
+text-align:center;
+padding:20px;
+}
+
+#message h1{
+
+font-size:60px;
+margin-bottom:20px;
+}
+
+#message p{
+
+font-size:24px;
+}
+
+.money{
+
+position:absolute;
+
+font-size:35px;
+
+animation:
+fall 5s linear forwards;
+}
+
+@keyframes fall{
+
+from{
+
+transform:
+translateY(-100px)
+rotate(0deg);
+
+opacity:1;
+}
+
+to{
+
+transform:
+translateY(120vh)
+rotate(720deg);
+
+opacity:0;
+}
+
+}
+
+.glow{
+
+animation:glow 2s infinite;
+}
+
+@keyframes glow{
+
+0%{
+text-shadow:0 0 10px gold;
+}
+
+50%{
+text-shadow:
+0 0 30px gold,
+0 0 60px gold;
+}
+
+100%{
+text-shadow:0 0 10px gold;
+}
+
+}
+
+.tap{
+margin-top:20px;
+font-size:22px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="gift">🎁</div>
+
+<div class="tap">
+Chạm vào hộp quà
+</div>
+
+<div id="message">
+
+<h1 class="glow">
+🎉 ANH CẢM ƠN 🎉
+</h1>
+
+<p id="guestName"></p>
+
+</div>
+
+<script>
+
+const params=
+new URLSearchParams(
+window.location.search
+);
+
+const guestName=
+params.get("name")
+||"";
+
+const gift=
+document.getElementById("gift");
+
+gift.addEventListener(
+"click",
+openGift
+);
+
+function openGift(){
+
+gift.innerHTML="💥";
+
+document.querySelector(".tap")
+.style.display="none";
+
+setTimeout(()=>{
+
+gift.style.display="none";
+
+showCelebration();
+
+},800);
+}
+
+function showCelebration(){
+
+document
+.getElementById("message")
+.style.display="block";
+
+document
+.getElementById("guestName")
+.innerHTML=
+`<b>${guestName}</b><br>
+❤️`;
+
+fireworks360();
+
+moneyRain();
+
+speakThankYou();
+
+}
+
+function fireworks360(){
+
+let duration=5000;
+
+let end=
+Date.now()+duration;
+
+(function frame(){
+
+confetti({
+
+particleCount:6,
+angle:60,
+spread:55,
+origin:{x:0}
+
+});
+
+confetti({
+
+particleCount:6,
+angle:120,
+spread:55,
+origin:{x:1}
+
+});
+
+confetti({
+
+particleCount:10,
+spread:360,
+startVelocity:40
+
+});
+
+if(Date.now()<end){
+
+requestAnimationFrame(frame);
+
+}
+
+})();
+
+}
+
+function moneyRain(){
+
+const symbols=[
+"💸",
+"💵",
+"💰",
+"🪙",
+"✨"
+];
+
+for(let i=0;i<150;i++){
+
+setTimeout(()=>{
+
+let money=
+document.createElement("div");
+
+money.className="money";
+
+money.innerHTML=
+symbols[
+Math.floor(
+Math.random()*
+symbols.length
+)
+];
+
+money.style.left=
+Math.random()*100+"vw";
+
+money.style.top="-50px";
+
+document.body.appendChild(money);
+
+setTimeout(()=>{
+
+money.remove();
+
+},5000);
+
+},i*50);
+}
+
+}
+
+function speakThankYou(){
+
+if(
+"speechSynthesis"
+in window
+){
+
+const text=
+
+`Xin chân thành cảm ơn
+${guestName}
+đã đồng hành cùng chúng tôi.
+Chúc quý khách nhiều sức khỏe,
+hạnh phúc và thành công.`;
+
+const msg=
+new SpeechSynthesisUtterance(
+text
+);
+
+msg.lang="vi-VN";
+
+speechSynthesis.speak(msg);
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
