@@ -29,14 +29,14 @@
   .sky {
     position: fixed; inset: 0;
     background: linear-gradient(180deg, #2b1e3f 0%, #6b3f69 35%, #d77a8f 65%, #ffc3a0 100%);
-    animation: dawn 9s ease-out forwards;
+    animation: dawn 5s ease-out forwards;
     z-index: 0;
   }
   .sky::after {
     content: ""; position: absolute; inset: 0;
     background: linear-gradient(180deg, #ffd6e0 0%, #ffe5d4 45%, #fff1e0 75%, #fff8ef 100%);
     opacity: 0;
-    animation: dayLight 9s ease-out forwards;
+    animation: dayLight 5s ease-out forwards;
   }
   @keyframes dayLight { to { opacity: 1; } }
 
@@ -47,7 +47,7 @@
     transform: translateX(-50%);
     background: radial-gradient(circle, #fff6d8 0%, #ffe09a 40%, #ffb38a 70%, rgba(255,160,140,0) 72%);
     box-shadow: 0 0 120px 60px rgba(255, 205, 150, .55), 0 0 260px 140px rgba(255, 170, 170, .35);
-    animation: rise 7s cubic-bezier(.2,.7,.2,1) forwards, pulse 5s ease-in-out 7s infinite;
+    animation: rise 4s cubic-bezier(.2,.7,.2,1) forwards, pulse 5s ease-in-out 4s infinite;
     z-index: 1;
   }
   @keyframes rise { to { bottom: 58%; } }
@@ -62,7 +62,7 @@
     mask-image: radial-gradient(circle, #000 0%, transparent 60%);
     -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%);
     opacity: 0; z-index: 1;
-    animation: raysIn 3s ease 6s forwards, spin 90s linear infinite;
+    animation: raysIn 2s ease 3s forwards, spin 90s linear infinite;
   }
   @keyframes raysIn { to { opacity: 1; } }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -94,7 +94,7 @@
   /* Phong thư */
   .envelope-wrap {
     position: absolute; text-align: center;
-    opacity: 0; animation: fadeUp 1.4s ease 5.2s forwards;
+    opacity: 0; animation: fadeUp .8s ease 1s forwards;
     transition: opacity .8s ease, transform .8s ease;
   }
   .envelope-wrap.gone { opacity: 0 !important; transform: scale(.85) translateY(30px); pointer-events: none; }
@@ -292,7 +292,7 @@
   .footer-note {
     position: fixed; bottom: 16px; left: 0; right: 0; z-index: 6;
     text-align: center; font-size: 12px; letter-spacing: .15em; color: rgba(138,75,99,.7);
-    opacity: 0; animation: fadeUp 1s ease 9s forwards;
+    opacity: 0; animation: fadeUp 1s ease 3s forwards;
   }
 
   .music {
@@ -612,7 +612,7 @@
     const r = env.getBoundingClientRect();
     burst(r.left + r.width / 2, r.top + r.height / 2, 40);
     setTimeout(() => envWrap.classList.add('gone'), 700);
-    setTimeout(() => { card.classList.add('show'); setTimeout(typeAll, 1300); }, 1300);
+    setTimeout(() => { card.classList.add('show'); setTimeout(typeAll, 600); }, 900);
   }
   env.addEventListener('click', openLetter);
   env.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLetter(); } });
@@ -635,11 +635,11 @@
       if (ci < line.length) {
         caret.before(document.createTextNode(line[ci++]));
         const ch = line[ci - 1];
-        setTimeout(step, /[,.—]/.test(ch) ? 260 : 38 + Math.random() * 30);
+        setTimeout(step, /[,.—]/.test(ch) ? 110 : 14 + Math.random() * 10);
       } else {
         li++; ci = 0;
         if (li < lines.length) caret.before(document.createElement('br'));
-        setTimeout(step, 520);
+        setTimeout(step, 220);
       }
     }
     step();
@@ -664,8 +664,8 @@
     wishEl.classList.add('swap');
     setTimeout(() => { wishEl.textContent = "Đang vào sảnh chờ… bấm Sẵn sàng hỉ 😄"; wishEl.classList.remove('swap'); }, 350);
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-    // iPhone chỉ mở app khi chuyển trang ngay trong cú chạm → không được trì hoãn
-    if (isIOS) openLienQuan(); else setTimeout(openLienQuan, 1200);
+    // Trình duyệt chỉ cho mở app khi chuyển trang ngay trong cú chạm → không được trì hoãn
+    openLienQuan();
   });
 
   /* ---------- Mở app ---------- */
@@ -675,9 +675,11 @@
 
   function openLienQuan() {
     if (isAndroid) {
-      // Mở thẳng game nếu đã cài, chưa cài thì Android tự chuyển sang Google Play
-      location.href = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;` +
-        `package=${LQ.androidPkg};S.browser_fallback_url=${encodeURIComponent(LQ.playStore)};end`;
+      // Chrome không cho web mở thẳng màn hình chính của game (không có BROWSABLE),
+      // nên nhờ CH Play mở hộ: market://launch → nếu đã cài thì CH Play bật game,
+      // nếu không thì hiện trang game trên CH Play (có nút "Chơi"/"Cài đặt").
+      location.href = `intent://launch?id=${LQ.androidPkg}#Intent;scheme=market;package=com.android.vending;` +
+        `S.browser_fallback_url=${encodeURIComponent(LQ.playStore)};end`;
     } else if (isIOS) {
       // iOS không cho web mở thẳng game → mở trang App Store (có sẵn nút "Mở")
       location.href = LQ.appStore;
