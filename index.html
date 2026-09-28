@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chào buổi sáng, LA ☀️</title>
+<title>Chào buổi sáng, LA 🔮</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,500;1,400&family=Be+Vietnam+Pro:wght@300;400;500&display=swap" rel="stylesheet">
@@ -85,9 +85,11 @@
   .stage {
     position: relative; z-index: 5;
     height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    padding: 24px;
+    display: flex; align-items: safe center; justify-content: center;
+    padding: 24px 24px 56px;
+    overflow-y: auto; overflow-x: hidden;
   }
+  .card { margin: auto 0; flex-shrink: 0; }
 
   /* Phong thư */
   .envelope-wrap {
@@ -204,6 +206,23 @@
     animation: heartbeat 1.6s ease-in-out infinite;
   }
 
+  .badges {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .badge {
+    font-size: 12px; font-weight: 500; letter-spacing: .02em;
+    padding: 6px 12px; border-radius: 999px;
+    color: #7b3b8f;
+    background: linear-gradient(135deg, rgba(214,180,255,.45), rgba(255,182,206,.45));
+    box-shadow: inset 0 0 0 1px rgba(155,89,182,.25);
+    opacity: 0; transform: translateY(8px);
+  }
+  .card.show .badge { animation: fadeUp .8s ease forwards; }
+  .card.show .badge:nth-child(1) { animation-delay: 1s; }
+  .card.show .badge:nth-child(2) { animation-delay: 1.15s; }
+  .card.show .badge:nth-child(3) { animation-delay: 1.3s; }
+
   .divider {
     display: flex; align-items: center; gap: 12px; justify-content: center;
     margin: 18px auto 22px; color: var(--rose);
@@ -248,6 +267,12 @@
     color: #fff;
     background: linear-gradient(135deg, #ff7aa2, #e75480);
     box-shadow: 0 10px 24px rgba(231, 84, 128, .35);
+  }
+  a.btn { display: inline-block; text-decoration: none; }
+  .btn-zalo {
+    color: #fff;
+    background: linear-gradient(135deg, #3aa0ff, #0068ff);
+    box-shadow: 0 10px 24px rgba(0, 104, 255, .28);
   }
   .btn-ghost {
     color: var(--rose-deep);
@@ -313,25 +338,32 @@
       <div class="body"></div>
       <div class="pocket"></div>
       <div class="flap"></div>
-      <div class="seal">♥</div>
+      <div class="seal">✦</div>
     </div>
-    <p class="hint">Có một lá thư cho em… chạm để mở nhé</p>
+    <p class="hint">Có thư từ đồng đội nè… chạm vô mở ra hỉ 🎮</p>
   </div>
 
   <!-- Thiệp -->
   <section class="card" id="card" aria-live="polite">
     <div class="greet-time" id="greetTime">Good morning</div>
     <div class="hello">Chào buổi sáng,</div>
-    <div class="name"><span class="l">L</span><span class="l">A</span><span class="mini-heart">♥</span></div>
+    <div class="name"><span class="l">L</span><span class="l">A</span><span class="mini-heart">✦</span></div>
+
+    <div class="badges">
+      <span class="badge">🎯 Lane: Mid</span>
+      <span class="badge">🔮 Main: Natalya</span>
+      <span class="badge">🏆 Mood: Chuỗi thắng</span>
+    </div>
 
     <div class="divider">❀</div>
 
     <p class="message" id="message"></p>
-    <div class="signature" id="signature">— Từ người luôn nghĩ về em</div>
+    <div class="signature" id="signature">— Một đồng đội đang chờ được mời vào trận 🎮</div>
 
     <div class="actions" id="actions">
-      <button class="btn btn-primary" id="hugBtn">Gửi anh một cái ôm 🤍</button>
-      <button class="btn btn-ghost" id="wishBtn">Một điều ước nhỏ ✨</button>
+      <button class="btn btn-primary" id="hugBtn">Vào trận hông? 🎮</button>
+      <a class="btn btn-zalo" id="zaloBtn" href="#">Nhắn đồng đội 💬</a>
+      <button class="btn btn-ghost" id="wishBtn">Rút buff hôm nay 🎲</button>
     </div>
     <div class="wish" id="wish"></div>
   </section>
@@ -341,29 +373,47 @@
 
 <script>
 (() => {
+  /* ---------- Cấu hình liên kết ----------
+     ZALO_PHONE: số điện thoại Zalo của bạn (vd "0912345678"). Để trống thì ẩn nút Zalo. */
+  const ZALO_PHONE = "0363870817";
+  const LQ = {
+    androidPkg: "com.garena.game.kgvn",
+    playStore:  "https://play.google.com/store/apps/details?id=com.garena.game.kgvn",
+    appStore:   "https://apps.apple.com/vn/app/id1150288115"
+  };
+
   /* ---------- Lời chúc ---------- */
   const lines = [
-    "Nắng đã lên rồi, nhưng chẳng tia nắng nào ấm bằng nụ cười của em.",
-    "Mong hôm nay em được bình yên, được yêu thương, và được là chính mình.",
-    "Nhớ ăn sáng, uống đủ nước, và đừng quên rằng — có một người đang nhớ em."
+    "Dậy chưa rứa, Mid lane? Trụ đầu chưa vỡ mô, cứ từ từ đánh răng.",
+    "Nhớ ăn sáng cho no — đọi cháo lươn hay tô bún chi cũng được, farm đủ rồi mới gánh team nha.",
+    "Chúc bựa ni Natalya combo trúng hết, nỏ bị ai cướp mạng, đồng đội thì… chịu nghe lời.",
+    "À, nếu đội hình còn thiếu một slot — thì có người đang online sẵn rồi đó 😌"
   ];
   const wishes = [
-    "Ước gì mỗi sáng đều được thấy em cười 🌷",
-    "Mong mọi điều dịu dàng nhất tìm đến em hôm nay",
-    "Em là lý do buổi sáng của anh trở nên đẹp hơn ☀️",
-    "Chúc em một ngày nhẹ như mây, ngọt như mật ong 🍯",
-    "Dù bận thế nào, nhớ dành một phút mỉm cười nhé 💗",
-    "Hôm nay em đã rất giỏi rồi, anh tự hào về em"
+    "Buff hôm nay: không đi rừng nào dám lấy bùa xanh của em 💙",
+    "Buff hôm nay: vào trận là được pick Mid, không ai tranh 🎯",
+    "Buff hôm nay: team địch 5 xạ thủ, không đứa nào có khống chế 😌",
+    "Buff hôm nay: Natalya một combo, một mạng, không hối hận 🔮",
+    "Buff hôm nay: chuỗi thắng dài hơn cả thời gian chờ ghép trận",
+    "Buff hôm nay: có thua thì chắc chắn tại team, không phải tại em 🙂",
+    "Buff hôm nay: Penta kill trong game, mood cũng Penta ngoài đời ✨",
+    "Buff hôm nay: support bỏ đường thì cứ ping, có người ra đứng cạnh (đứng thôi) 😅",
+    "Buff hôm nay: thua trận cũng nỏ răng, ăn đọi cháo lươn là hết buồn 🍜",
+    "Buff hôm nay: đồng đội mô feed thì cứ hỏi \"mi đi mô rứa?\" 😤",
+    "Buff hôm nay: Natalya bấm một phát, địch nằm hết — ưng cái bụng chưa? 😎",
+    "Buff hôm nay: rank lên vù vù, nỏ ai cản được mô 🚀",
+    "Buff hôm nay: có người âm thầm cổ vũ, dù chỉ biết ngồi xem 👀",
+    "Buff hôm nay: cười nhiều lên — nghe nói hiệu ứng đó gây sát thương diện rộng 🙂"
   ];
 
   /* ---------- Chào theo giờ ---------- */
   const now = new Date();
   const h = now.getHours();
   const greetTime = document.getElementById('greetTime');
-  greetTime.textContent = h < 11 ? "Good morning · Sáng trong lành" : h < 14 ? "Buổi trưa dịu dàng" : h < 18 ? "Buổi chiều êm ả" : "Dù trời đã tối, vẫn là buổi sáng của anh";
+  greetTime.textContent = h < 11 ? "Good morning · Mid lane dậy chưa rứa?" : h < 14 ? "Buổi trưa · Về nhà hồi máu thôi" : h < 18 ? "Buổi chiều · Giờ vàng leo rank" : "Tối rồi · Một trận nữa thôi rồi ngủ hỉ";
   const days = ["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"];
   document.getElementById('dateNote').textContent =
-    `${days[now.getDay()]}, ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()} · một ngày mới dành riêng cho LA`;
+    `${days[now.getDay()]}, ${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()} · bựa ni chúc LA toàn chữ Victory hỉ`;
 
   /* ---------- Mây ---------- */
   const cloudBox = document.getElementById('clouds');
@@ -449,7 +499,9 @@
       bursts.push({
         x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 2,
         s: 10 + Math.random() * 16, life: 1,
-        hue: 330 + Math.random() * 30, rot: (Math.random() - .5) * .6
+        hue: Math.random() < .5 ? 40 + Math.random() * 10 : 330 + Math.random() * 30,
+        rot: (Math.random() - .5) * .6,
+        heart: Math.random() < .12 // thỉnh thoảng mới lọt một trái tim
       });
     }
   }
@@ -458,7 +510,16 @@
     sparks.push({ x, y, life: 1, s: 1.5 + Math.random() * 2.5, vx: (Math.random() - .5) * .8, vy: -Math.random() * .8 });
   }
 
-  // Tim bay lên chậm rãi ở nền
+  function starPath(x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * .45 : r;
+      ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    ctx.closePath();
+  }
+
+  // Đốm nắng (bokeh) trôi lên chậm rãi ở nền
   const floaters = [];
   setInterval(() => {
     if (floaters.length < 14) floaters.push({
@@ -474,8 +535,11 @@
       f.y -= f.vy; f.ph += .02;
       ctx.save();
       ctx.globalAlpha = f.a * Math.min(1, (f.y) / 200);
-      ctx.fillStyle = '#ff7aa2';
-      heartPath(f.x + Math.sin(f.ph) * 20, f.y, f.s);
+      const fx = f.x + Math.sin(f.ph) * 20;
+      const g = ctx.createRadialGradient(fx, f.y, 0, fx, f.y, f.s);
+      g.addColorStop(0, 'rgba(255,236,200,.9)'); g.addColorStop(1, 'rgba(255,190,200,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(fx, f.y, f.s, 0, Math.PI * 2);
       ctx.fill(); ctx.restore();
     }
     for (let i = floaters.length - 1; i >= 0; i--) if (floaters[i].y < -40) floaters.splice(i, 1);
@@ -496,8 +560,8 @@
       ctx.globalAlpha = b.life;
       ctx.translate(b.x, b.y); ctx.rotate(b.rot);
       ctx.fillStyle = `hsl(${b.hue}, 90%, ${65 + (1 - b.life) * 15}%)`;
-      ctx.shadowColor = 'rgba(255,120,160,.6)'; ctx.shadowBlur = 10;
-      heartPath(0, -b.s / 2, b.s);
+      ctx.shadowColor = 'rgba(255,200,150,.6)'; ctx.shadowBlur = 10;
+      if (b.heart) heartPath(0, -b.s / 2, b.s); else starPath(0, 0, b.s / 2);
       ctx.fill(); ctx.restore();
     }
 
@@ -598,8 +662,37 @@
   document.getElementById('hugBtn').addEventListener('click', () => {
     for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * W, H * (.2 + Math.random() * .6), 22), i * 180);
     wishEl.classList.add('swap');
-    setTimeout(() => { wishEl.textContent = "Đã nhận được cái ôm thật chặt 🤗💞"; wishEl.classList.remove('swap'); }, 350);
+    setTimeout(() => { wishEl.textContent = "Đang vào sảnh chờ… bấm Sẵn sàng hỉ 😄"; wishEl.classList.remove('swap'); }, 350);
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+    // iPhone chỉ mở app khi chuyển trang ngay trong cú chạm → không được trì hoãn
+    if (isIOS) openLienQuan(); else setTimeout(openLienQuan, 1200);
+  });
+
+  /* ---------- Mở app ---------- */
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  function openLienQuan() {
+    if (isAndroid) {
+      // Mở thẳng game nếu đã cài, chưa cài thì Android tự chuyển sang Google Play
+      location.href = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;` +
+        `package=${LQ.androidPkg};S.browser_fallback_url=${encodeURIComponent(LQ.playStore)};end`;
+    } else if (isIOS) {
+      // iOS không cho web mở thẳng game → mở trang App Store (có sẵn nút "Mở")
+      location.href = LQ.appStore;
+    } else {
+      window.open(LQ.playStore, '_blank');
+    }
+  }
+
+  const zaloBtn = document.getElementById('zaloBtn');
+  if (!ZALO_PHONE) zaloBtn.style.display = 'none';
+  // Link thật (thẻ <a>) để iPhone/Android nhận là Universal Link → mở thẳng app Zalo tới khung chat
+  zaloBtn.href = `https://zalo.me/${ZALO_PHONE.replace(/\D/g, '')}`;
+  zaloBtn.addEventListener('click', () => {
+    const r = zaloBtn.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, 16);
   });
 
   /* ---------- Nhạc nền nhẹ (Web Audio, không cần file) ---------- */
